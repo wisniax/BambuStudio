@@ -2114,8 +2114,17 @@ void GCode::_do_export(Print& print, GCodeOutputStream &file, ThumbnailsGenerato
         std::string secret = app_config.get("custom_auth_secret");
         if (!user.empty())
             file.write_format("; User: %s\n", user.c_str());
-        if (!secret.empty())
-            file.write_format("; Secret: %s\n", secret.c_str());
+        if (!secret.empty()) {
+            std::string plate_name = print.get_plate_name();
+#ifdef CUSTOM_AUTH_SECRET_KEY
+            std::string key = CUSTOM_AUTH_SECRET_KEY;
+#else
+            std::string key = "";
+#endif
+            std::string combined = secret + plate_name + key;
+            std::string hashed_secret = bbl_calc_sha256(combined);
+            file.write_format("; Secret: %s\n", hashed_secret.c_str());
+        }
     }
     //BBS: total estimated printing time
     file.write_format(";%s\n", GCodeProcessor::reserved_tag(GCodeProcessor::ETags::Estimated_Printing_Time_Placeholder).c_str());
