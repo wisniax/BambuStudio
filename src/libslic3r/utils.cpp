@@ -1529,6 +1529,20 @@ bool bbl_calc_md5(std::string &filename, std::string &md5_out)
     return true;
 }
 
+std::string bbl_calc_sha256(const std::string& input)
+{
+    unsigned char digest[SHA256_DIGEST_LENGTH];
+    SHA256_CTX ctx;
+    SHA256_Init(&ctx);
+    SHA256_Update(&ctx, input.c_str(), input.size());
+    SHA256_Final(digest, &ctx);
+
+    char sha256_str[SHA256_DIGEST_LENGTH * 2 + 1];
+    for (int j = 0; j < SHA256_DIGEST_LENGTH; j++) { sprintf(&sha256_str[j * 2], "%02x", (unsigned int) digest[j]); }
+    sha256_str[SHA256_DIGEST_LENGTH * 2] = '\0';
+    return std::string(sha256_str);
+}
+
 void save_string_file(const boost::filesystem::path& p, const std::string& str)
 {
     boost::nowide::ofstream file;
