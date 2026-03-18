@@ -1542,6 +1542,61 @@ wxWindow* PreferencesDialog::create_general_page()
     sizer_page->Add(item_develop_mode, 0, wxTOP, FromDIP(3));
     sizer_page->Add(item_skip_ams_blacklist_check, 0, wxTOP, FromDIP(3));
 
+    auto title_custom_auth = create_item_title(_L("Custom Credentials"), page, _L("Custom Credentials"));
+
+    wxBoxSizer *sizer_user = new wxBoxSizer(wxHORIZONTAL);
+    auto user_title = new wxStaticText(page, wxID_ANY, _L("User"), wxDefaultPosition, DESIGN_TITLE_SIZE, 0);
+    user_title->SetForegroundColour(DESIGN_GRAY900_COLOR);
+    user_title->SetFont(::Label::Body_13);
+    auto user_input = new ::TextInput(page, wxEmptyString, wxEmptyString, wxEmptyString, wxDefaultPosition, DESIGN_LARGE_COMBOBOX_SIZE, wxTE_PROCESS_ENTER);
+    StateColor input_bg(std::pair<wxColour, int>(wxColour("#F0F0F1"), StateColor::Disabled), std::pair<wxColour, int>(*wxWHITE, StateColor::Enabled));
+    user_input->SetBackgroundColor(input_bg);
+    user_input->GetTextCtrl()->SetMaxLength(24);
+    user_input->GetTextCtrl()->SetValue(app_config->get("custom_auth_user"));
+    user_input->GetTextCtrl()->Bind(wxEVT_TEXT_ENTER, [this, user_input](wxCommandEvent &e) {
+        auto value = user_input->GetTextCtrl()->GetValue();
+        app_config->set("custom_auth_user", std::string(value.mb_str()));
+        app_config->save();
+        e.Skip();
+    });
+    user_input->GetTextCtrl()->Bind(wxEVT_KILL_FOCUS, [this, user_input](wxFocusEvent &e) {
+        auto value = user_input->GetTextCtrl()->GetValue();
+        app_config->set("custom_auth_user", std::string(value.mb_str()));
+        app_config->save();
+        e.Skip();
+    });
+    sizer_user->Add(0, 0, 0, wxEXPAND | wxLEFT, 23);
+    sizer_user->Add(user_title, 0, wxALIGN_CENTER_VERTICAL | wxALL, 3);
+    sizer_user->Add(user_input, 0, wxALIGN_CENTER_VERTICAL, 0);
+
+    wxBoxSizer *sizer_secret = new wxBoxSizer(wxHORIZONTAL);
+    auto secret_title = new wxStaticText(page, wxID_ANY, _L("Secret"), wxDefaultPosition, DESIGN_TITLE_SIZE, 0);
+    secret_title->SetForegroundColour(DESIGN_GRAY900_COLOR);
+    secret_title->SetFont(::Label::Body_13);
+    auto secret_input = new ::TextInput(page, wxEmptyString, wxEmptyString, wxEmptyString, wxDefaultPosition, DESIGN_LARGE_COMBOBOX_SIZE, wxTE_PROCESS_ENTER | wxTE_PASSWORD);
+    secret_input->SetBackgroundColor(input_bg);
+    secret_input->GetTextCtrl()->SetMaxLength(24);
+    secret_input->GetTextCtrl()->SetValue(app_config->get("custom_auth_secret"));
+    secret_input->GetTextCtrl()->Bind(wxEVT_TEXT_ENTER, [this, secret_input](wxCommandEvent &e) {
+        auto value = secret_input->GetTextCtrl()->GetValue();
+        app_config->set("custom_auth_secret", std::string(value.mb_str()));
+        app_config->save();
+        e.Skip();
+    });
+    secret_input->GetTextCtrl()->Bind(wxEVT_KILL_FOCUS, [this, secret_input](wxFocusEvent &e) {
+        auto value = secret_input->GetTextCtrl()->GetValue();
+        app_config->set("custom_auth_secret", std::string(value.mb_str()));
+        app_config->save();
+        e.Skip();
+    });
+    sizer_secret->Add(0, 0, 0, wxEXPAND | wxLEFT, 23);
+    sizer_secret->Add(secret_title, 0, wxALIGN_CENTER_VERTICAL | wxALL, 3);
+    sizer_secret->Add(secret_input, 0, wxALIGN_CENTER_VERTICAL, 0);
+
+    sizer_page->Add(title_custom_auth, 0, wxTOP | wxEXPAND, FromDIP(20));
+    sizer_page->Add(sizer_user, 0, wxTOP, FromDIP(3));
+    sizer_page->Add(sizer_secret, 0, wxTOP, FromDIP(3));
+
     page->SetSizer(sizer_page);
     page->Layout();
     sizer_page->Fit(page);

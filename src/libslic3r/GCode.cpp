@@ -10,6 +10,7 @@
 #include "ShortestPath.hpp"
 #include "Print.hpp"
 #include "Utils.hpp"
+#include "AppConfig.hpp"
 #include "ClipperUtils.hpp"
 #include "libslic3r.h"
 #include "LocalesUtils.hpp"
@@ -2106,6 +2107,16 @@ void GCode::_do_export(Print& print, GCodeOutputStream &file, ThumbnailsGenerato
     file.write_format("; HEADER_BLOCK_START\n");
     // Write information on the generator.
     file.write_format("; %s\n", Slic3r::header_slic3r_generated().c_str());
+    {
+        AppConfig app_config;
+        app_config.load();
+        std::string user = app_config.get("custom_auth_user");
+        std::string secret = app_config.get("custom_auth_secret");
+        if (!user.empty())
+            file.write_format("; User: %s\n", user.c_str());
+        if (!secret.empty())
+            file.write_format("; Secret: %s\n", secret.c_str());
+    }
     //BBS: total estimated printing time
     file.write_format(";%s\n", GCodeProcessor::reserved_tag(GCodeProcessor::ETags::Estimated_Printing_Time_Placeholder).c_str());
     //BBS: total layer number
