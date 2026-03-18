@@ -2107,27 +2107,7 @@ void GCode::_do_export(Print& print, GCodeOutputStream &file, ThumbnailsGenerato
     file.write_format("; HEADER_BLOCK_START\n");
     // Write information on the generator.
     file.write_format("; %s\n", Slic3r::header_slic3r_generated().c_str());
-    {
-        AppConfig app_config;
-        app_config.load();
-        std::string user = app_config.get("custom_auth_user");
-        std::string secret = app_config.get("custom_auth_secret");
-        
-        if (!user.empty())
-            file.write_format("; User: %s\n", user.c_str());
-
-        if (!secret.empty()) {
-
-#ifdef CUSTOM_AUTH_SECRET_KEY
-            std::string key = CUSTOM_AUTH_SECRET_KEY;
-#else
-            std::string key = "";
-#endif
-            std::string combined = secret + key;
-            std::string hashed_secret = bbl_calc_sha256(combined);
-            file.write_format("; Secret: %s\n", hashed_secret.c_str());
-        }
-    }
+    file.write_format(";%s\n", GCodeProcessor::reserved_tag(GCodeProcessor::ETags::Custom_Auth_Placeholder).c_str());
     //BBS: total estimated printing time
     file.write_format(";%s\n", GCodeProcessor::reserved_tag(GCodeProcessor::ETags::Estimated_Printing_Time_Placeholder).c_str());
     //BBS: total layer number

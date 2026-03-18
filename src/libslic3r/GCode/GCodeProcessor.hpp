@@ -454,7 +454,8 @@ namespace Slic3r {
             MachineEndGCodeStart,
             NozzleChangeStart,
             NozzleChangeEnd,
-            CP_TOOLCHANGE_WIPE
+            CP_TOOLCHANGE_WIPE,
+            Custom_Auth_Placeholder
         };
 
         enum class CustomETags : unsigned char

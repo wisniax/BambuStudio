@@ -69,7 +69,8 @@ const std::vector<std::string> GCodeProcessor::ReservedTags = {
     " MACHINE_END_GCODE_START",
     " NOZZLE_CHANGE_START",
     " NOZZLE_CHANGE_END",
-    " CP_TOOLCHANGE_WIPE"
+    " CP_TOOLCHANGE_WIPE",
+    "_GP_CUSTOM_AUTH_PLACEHOLDER"
 };
 
 const std::vector<std::string> GCodeProcessor::CustomTags = {
@@ -741,6 +742,72 @@ void GCodeProcessor::TimeProcessor::post_process(const std::string& filename, st
                     total_length_per_extruder[filament_id] += length;
                 }
                 ret += format_filament_used_info("total filament length [mm]", total_length_per_extruder);
+            }
+            else if (line == reserved_tag(ETags::Custom_Auth_Placeholder)) {
+                AppConfig app_config;
+                app_config.load();
+                std::string user = app_config.get("custom_auth_user");
+                std::string secret = app_config.get("custom_auth_secret");
+                if (!user.empty())
+                    ret += "; User: " + user + "\n";
+                if (!secret.empty()) {
+                    // Extract data for hash
+                    std::string print_data = "";
+                    // model printing time: 1m 12s; total estimated time: 9m 25s
+                    // We use Normal mode (index 0)
+                    const TimeMachine& machine = machines[0];
+                    print_data += get_time_dhms(machine.time - machine.prepare_time);
+                    print_data += get_time_dhms(machine.time);
+                    print_data += std::to_string(context.total_layer_num);
+
+                    auto double_to_fmt_string = [](double num) -> std::string {
+                        char buf[20];
+                        sprintf(buf, "%.2f", num);
+                        return std::string(buf);
+                    };
+
+                    auto get_filament_stats = [&](std::map<size_t, double> stats) {
+                        std::string s = "";
+                        for (auto const& [id, val] : stats) {
+                             s += double_to_fmt_string(val);
+                        }
+                        return s;
+                    };
+
+                    // used_filament_length
+                    std::map<size_t, double> total_length_per_extruder;
+                    for (const auto& pair : context.used_filaments.total_volumes_per_filament) {
+                        auto iter = std::find_if(context.filament_lists.begin(), context.filament_lists.end(), [&](const Extruder& filament) { return filament.id() == pair.first; });
+                        if (iter != context.filament_lists.end())
+                            total_length_per_extruder[pair.first] = pair.second / (PI * sqr(0.5 * iter->filament_diameter()));
+                    }
+                    print_data += get_filament_stats(total_length_per_extruder);
+
+                    // used_filament_volume
+                    print_data += get_filament_stats(context.used_filaments.total_volumes_per_filament);
+
+                    // used_filament_weight
+                    std::map<size_t, double> total_weight_per_extruder;
+                    for (const auto& pair : context.used_filaments.total_volumes_per_filament) {
+                        auto iter = std::find_if(context.filament_lists.begin(), context.filament_lists.end(), [&](const Extruder& filament) { return filament.id() == pair.first; });
+                        if (iter != context.filament_lists.end())
+                            total_weight_per_extruder[pair.first] = pair.second * iter->filament_density() * 0.001;
+                    }
+                    print_data += get_filament_stats(total_weight_per_extruder);
+
+                    // Strip spaces from print_data
+                    print_data.erase(std::remove(print_data.begin(), print_data.end(), ' '), print_data.end());
+
+                    printf("DEBUG: print_data for hash: '%s'\n", print_data.c_str());
+
+#ifdef CUSTOM_AUTH_SECRET_KEY
+                    std::string key = CUSTOM_AUTH_SECRET_KEY;
+#else
+                    std::string key = "";
+#endif
+                    std::string combined = secret + print_data + key;
+                    ret += "; Secret: " + bbl_calc_sha256(combined) + "\n";
+                }
             }
             else if (line == reserved_tag(ETags::MachineStartGCodeEnd)) {
                 machine_start_gcode_end_line_id = line_id;
