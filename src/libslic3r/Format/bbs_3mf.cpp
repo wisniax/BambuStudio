@@ -4009,7 +4009,8 @@ void PlateData::parse_filament_info(GCodeProcessorResult *result)
             m_model_id = xml_unescape(m_curr_characters);
         } else if (m_curr_metadata_name == BBL_MODEL_NAME_TAG) {
             BOOST_LOG_TRIVIAL(trace) << "design_info, load_3mf found model name = " << m_curr_characters;
-            model_info.model_name = xml_unescape(m_curr_characters);
+            model_info.model_name = "";
+            m_curr_characters = "";
         } else if (m_curr_metadata_name == BBL_ORIGIN_TAG) {
             BOOST_LOG_TRIVIAL(trace) << "design_info, load_3mf found model name = " << m_curr_characters;
             model_info.origin = xml_unescape(m_curr_characters);
@@ -4021,7 +4022,8 @@ void PlateData::parse_filament_info(GCodeProcessorResult *result)
             m_designer_user_id = xml_unescape(m_curr_characters);
         }else if (m_curr_metadata_name == BBL_DESIGNER_MODEL_ID_TAG) {
             BOOST_LOG_TRIVIAL(trace) << "design_info, load_3mf found designer_model_id = " << m_curr_characters;
-            m_designer_id = xml_unescape(m_curr_characters);
+            m_designer_id = "";
+            m_curr_characters = "";
         }else if (m_curr_metadata_name == BBL_DESIGN_ID_TAG) {
             BOOST_LOG_TRIVIAL(trace) << "design_info, load_3mf found design_id = " << m_curr_characters;
             m_design_id = xml_unescape(m_curr_characters);
@@ -4045,7 +4047,8 @@ void PlateData::parse_filament_info(GCodeProcessorResult *result)
             m_contry_code = xml_unescape(m_curr_characters);
         } else if (m_curr_metadata_name == BBL_PROFILE_TITLE_TAG) {
             BOOST_LOG_TRIVIAL(trace) << "design_info, load_3mf found profile_title = " << m_curr_characters;
-            m_profile_title = xml_unescape(m_curr_characters);
+            m_profile_title = "";
+            m_curr_characters = "";
         } else if (m_curr_metadata_name == BBL_PROFILE_COVER_TAG) {
             BOOST_LOG_TRIVIAL(trace) << "design_info, load_3mf found profile_cover = " << m_curr_characters;
             m_profile_cover = xml_unescape(m_curr_characters);
