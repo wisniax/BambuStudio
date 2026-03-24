@@ -19,6 +19,7 @@ jobs:
       date:
       ver:
       ver_pure:
+      CUSTOM_AUTH_SECRET_KEY: ${{ secrets.CUSTOM_AUTH_SECRET_KEY }}
 
     steps:
       - name: Checkout
