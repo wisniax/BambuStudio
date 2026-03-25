@@ -13,7 +13,7 @@ endif()
 
 # The build_version should start from 50 in master branch
 
-set(SLIC3R_VERSION "02.05.00.66-fap")
+set(SLIC3R_VERSION "02.06.00.66")
 
 string(REGEX REPLACE "-.*" "" SLIC3R_VERSION_NUMERIC ${SLIC3R_VERSION})
 string(REPLACE "." "," SLIC3R_COMMA_SEPARATED_VERSION ${SLIC3R_VERSION_NUMERIC})
