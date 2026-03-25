@@ -798,7 +798,7 @@ void GCodeProcessor::TimeProcessor::post_process(const std::string& filename, st
                     // Strip spaces from print_data
                     print_data.erase(std::remove(print_data.begin(), print_data.end(), ' '), print_data.end());
 
-                    printf("DEBUG: print_data for hash: '%s'\n", print_data.c_str());
+                    // printf("DEBUG: print_data for hash: '%s'\n", print_data.c_str());
 
 #ifdef CUSTOM_AUTH_SECRET_KEY
                     std::string key = CUSTOM_AUTH_SECRET_KEY;
