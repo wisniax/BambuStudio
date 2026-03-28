@@ -21,6 +21,7 @@ endif ()
 # Modern Windows tar (since Win10 1803) supports extracting .7z files.
 ExternalProject_Add(dep_Mesa
     URL "https://github.com/pal1000/mesa-dist-win/releases/download/23.3.5/mesa3d-23.3.5-release-msvc.7z"
+    URL_HASH SHA256=ce42bee2034f3dbd272f1d658040dfa678c0d8e653f260be8808f4e80f34c06a
     DOWNLOAD_DIR ${DEP_DOWNLOAD_DIR}/Mesa
     DOWNLOAD_NO_EXTRACT TRUE
     CONFIGURE_COMMAND ""
