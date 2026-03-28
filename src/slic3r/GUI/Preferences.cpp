@@ -1555,14 +1555,20 @@ wxWindow* PreferencesDialog::create_general_page()
     user_input->GetTextCtrl()->SetValue(app_config->get("custom_auth_user"));
     user_input->GetTextCtrl()->Bind(wxEVT_TEXT_ENTER, [this, user_input](wxCommandEvent &e) {
         auto value = user_input->GetTextCtrl()->GetValue();
-        app_config->set("custom_auth_user", std::string(value.mb_str()));
-        app_config->save();
+        if (app_config->get("custom_auth_user") != value) {
+            app_config->set("custom_auth_user", std::string(value.mb_str()));
+            app_config->save();
+            m_custom_auth_changed = true;
+        }
         e.Skip();
     });
     user_input->GetTextCtrl()->Bind(wxEVT_KILL_FOCUS, [this, user_input](wxFocusEvent &e) {
         auto value = user_input->GetTextCtrl()->GetValue();
-        app_config->set("custom_auth_user", std::string(value.mb_str()));
-        app_config->save();
+        if (app_config->get("custom_auth_user") != value) {
+            app_config->set("custom_auth_user", std::string(value.mb_str()));
+            app_config->save();
+            m_custom_auth_changed = true;
+        }
         e.Skip();
     });
     sizer_user->Add(0, 0, 0, wxEXPAND | wxLEFT, 23);
@@ -1579,14 +1585,20 @@ wxWindow* PreferencesDialog::create_general_page()
     secret_input->GetTextCtrl()->SetValue(app_config->get("custom_auth_secret"));
     secret_input->GetTextCtrl()->Bind(wxEVT_TEXT_ENTER, [this, secret_input](wxCommandEvent &e) {
         auto value = secret_input->GetTextCtrl()->GetValue();
-        app_config->set("custom_auth_secret", std::string(value.mb_str()));
-        app_config->save();
+        if (app_config->get("custom_auth_secret") != value) {
+            app_config->set("custom_auth_secret", std::string(value.mb_str()));
+            app_config->save();
+            m_custom_auth_changed = true;
+        }
         e.Skip();
     });
     secret_input->GetTextCtrl()->Bind(wxEVT_KILL_FOCUS, [this, secret_input](wxFocusEvent &e) {
         auto value = secret_input->GetTextCtrl()->GetValue();
-        app_config->set("custom_auth_secret", std::string(value.mb_str()));
-        app_config->save();
+        if (app_config->get("custom_auth_secret") != value) {
+            app_config->set("custom_auth_secret", std::string(value.mb_str()));
+            app_config->save();
+            m_custom_auth_changed = true;
+        }
         e.Skip();
     });
     sizer_secret->Add(0, 0, 0, wxEXPAND | wxLEFT, 23);

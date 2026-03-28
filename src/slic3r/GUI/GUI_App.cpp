@@ -6691,12 +6691,14 @@ void  GUI_App::show_ip_address_enter_dialog_handler(wxCommandEvent& evt)
 void GUI_App::open_preferences(size_t open_on_tab, const std::string& highlight_option)
 {
     bool app_layout_changed = false;
+    bool custom_auth_changed = false;
     {
         // the dialog needs to be destroyed before the call to recreate_GUI()
         // or sometimes the application crashes into wxDialogBase() destructor
         // so we put it into an inner scope
         PreferencesDialog dlg(mainframe, open_on_tab, highlight_option);
         dlg.ShowModal();
+        custom_auth_changed = dlg.custom_auth_changed();
         // BBS
         //app_layout_changed = dlg.settings_layout_changed();
 #if ENABLE_GCODE_LINES_ID_IN_H_SLIDER
@@ -6721,6 +6723,14 @@ void GUI_App::open_preferences(size_t open_on_tab, const std::string& highlight_
                 associate_files(L"gcode");
         }
 #endif // _WIN32
+    }
+
+    if (custom_auth_changed) {
+        MessageDialog msg_wingow(nullptr, _L("The custom credentials have been changed. Application restart is required for these changes to take effect.\n") + "\n" + _L("Do you want to restart now?"),
+                                 _L("Custom Credentials"), wxICON_QUESTION | wxOK | wxCANCEL);
+        if (msg_wingow.ShowModal() == wxID_OK) {
+             this->recreate_GUI(_L("Changing custom credentials"));
+        }
     }
 
     // BBS
