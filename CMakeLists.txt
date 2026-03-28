@@ -661,6 +661,10 @@ function(bambustudio_copy_dlls target config postfix output_dlls)
             ${CMAKE_PREFIX_PATH}/bin/avutil-59.dll
          DESTINATION ${_out_dir})
 
+    if (EXISTS ${CMAKE_PREFIX_PATH}/bin/mesa/opengl32.dll)
+        file(COPY ${CMAKE_PREFIX_PATH}/bin/mesa/opengl32.dll DESTINATION ${_out_dir}/mesa)
+    endif ()
+
     set(${output_dlls}
         ${_out_dir}/libgmp-10.dll
         ${_out_dir}/libmpfr-4.dll
