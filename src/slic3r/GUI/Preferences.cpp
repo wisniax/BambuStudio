@@ -1134,6 +1134,9 @@ PreferencesDialog::PreferencesDialog(wxWindow *parent, wxWindowID id, const wxSt
     create();
     wxGetApp().UpdateDlgDarkUI(this);
     Bind(wxEVT_CLOSE_WINDOW, [this](wxCloseEvent& event) {
+        if (m_custom_auth_changed) {
+            app_config->save();
+        }
         try {
             NetworkAgent* agent = GUI::wxGetApp().getAgent();
             if (agent) {
@@ -1553,6 +1556,12 @@ wxWindow* PreferencesDialog::create_general_page()
     user_input->SetBackgroundColor(input_bg);
     user_input->GetTextCtrl()->SetMaxLength(24);
     user_input->GetTextCtrl()->SetValue(app_config->get("custom_auth_user"));
+    user_input->GetTextCtrl()->Bind(wxEVT_TEXT, [this, user_input](wxCommandEvent &e) {
+        auto value = user_input->GetTextCtrl()->GetValue();
+        app_config->set("custom_auth_user", std::string(value.mb_str()));
+        m_custom_auth_changed = true;
+        e.Skip();
+    });
     user_input->GetTextCtrl()->Bind(wxEVT_TEXT_ENTER, [this, user_input](wxCommandEvent &e) {
         auto value = user_input->GetTextCtrl()->GetValue();
         if (app_config->get("custom_auth_user") != value) {
@@ -1583,6 +1592,12 @@ wxWindow* PreferencesDialog::create_general_page()
     secret_input->SetBackgroundColor(input_bg);
     secret_input->GetTextCtrl()->SetMaxLength(24);
     secret_input->GetTextCtrl()->SetValue(app_config->get("custom_auth_secret"));
+    secret_input->GetTextCtrl()->Bind(wxEVT_TEXT, [this, secret_input](wxCommandEvent &e) {
+        auto value = secret_input->GetTextCtrl()->GetValue();
+        app_config->set("custom_auth_secret", std::string(value.mb_str()));
+        m_custom_auth_changed = true;
+        e.Skip();
+    });
     secret_input->GetTextCtrl()->Bind(wxEVT_TEXT_ENTER, [this, secret_input](wxCommandEvent &e) {
         auto value = secret_input->GetTextCtrl()->GetValue();
         if (app_config->get("custom_auth_secret") != value) {
@@ -1605,9 +1620,49 @@ wxWindow* PreferencesDialog::create_general_page()
     sizer_secret->Add(secret_title, 0, wxALIGN_CENTER_VERTICAL | wxALL, 3);
     sizer_secret->Add(secret_input, 0, wxALIGN_CENTER_VERTICAL, 0);
 
+    wxBoxSizer *sizer_apply = new wxBoxSizer(wxHORIZONTAL);
+    sizer_apply->Add(0, 0, 0, wxEXPAND | wxLEFT, 23);
+    auto apply_title = new wxStaticText(page, wxID_ANY, "", wxDefaultPosition, DESIGN_TITLE_SIZE, 0);
+    sizer_apply->Add(apply_title, 0, wxALIGN_CENTER_VERTICAL | wxALL, 3);
+    auto apply_button = new Button(page, _L("Restart to apply"));
+    apply_button->SetSize(wxSize(FromDIP(120), FromDIP(24)));
+    apply_button->SetCornerRadius(FromDIP(12));
+    apply_button->Bind(wxEVT_BUTTON, [this, user_input, secret_input](auto& e) {
+        auto user_val = user_input->GetTextCtrl()->GetValue();
+        if (app_config->get("custom_auth_user") != user_val) {
+            app_config->set("custom_auth_user", std::string(user_val.mb_str()));
+            m_custom_auth_changed = true;
+        }
+        auto secret_val = secret_input->GetTextCtrl()->GetValue();
+        if (app_config->get("custom_auth_secret") != secret_val) {
+            app_config->set("custom_auth_secret", std::string(secret_val.mb_str()));
+            m_custom_auth_changed = true;
+        }
+
+        if (m_custom_auth_changed) {
+            app_config->save();
+            MessageDialog msg_wingow(this, _L("The custom credentials have been changed. Application restart is required for these changes to take effect.\n") + "\n" + _L("Do you want to restart now?"),
+                                 _L("Custom Credentials"), wxICON_QUESTION | wxOK | wxCANCEL);
+            auto res = msg_wingow.ShowModal();
+            m_custom_auth_changed = false;
+            if (res == wxID_OK) {
+                 this->Close();
+                 if (this->GetParent())
+                    this->GetParent()->RemoveChild(this);
+                 wxGetApp().recreate_GUI(_L("Changing custom credentials"));
+            }
+        } else {
+             MessageDialog msg_wingow(this, _L("The custom credentials have not been changed."),
+                                 _L("Custom Credentials"), wxICON_INFORMATION | wxOK);
+             msg_wingow.ShowModal();
+        }
+    });
+    sizer_apply->Add(apply_button, 0, wxALIGN_CENTER_VERTICAL, 0);
+
     sizer_page->Add(title_custom_auth, 0, wxTOP | wxEXPAND, FromDIP(20));
     sizer_page->Add(sizer_user, 0, wxTOP, FromDIP(3));
     sizer_page->Add(sizer_secret, 0, wxTOP, FromDIP(3));
+    sizer_page->Add(sizer_apply, 0, wxTOP, FromDIP(3));
 
     page->SetSizer(sizer_page);
     page->Layout();

@@ -6726,7 +6726,7 @@ void GUI_App::open_preferences(size_t open_on_tab, const std::string& highlight_
     }
 
     if (custom_auth_changed) {
-        MessageDialog msg_wingow(nullptr, _L("The custom credentials have been changed. Application restart is required for these changes to take effect.\n") + "\n" + _L("Do you want to restart now?"),
+        MessageDialog msg_wingow(mainframe, _L("The custom credentials have been changed. Application restart is required for these changes to take effect.\n") + "\n" + _L("Do you want to restart now?"),
                                  _L("Custom Credentials"), wxICON_QUESTION | wxOK | wxCANCEL);
         if (msg_wingow.ShowModal() == wxID_OK) {
              this->recreate_GUI(_L("Changing custom credentials"));
